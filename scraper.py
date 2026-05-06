@@ -5,14 +5,13 @@ import os
 from datetime import datetime
 import pytz
 
-# Target URLs (Update these if the actual endpoints differ)
+# Target URLs including the specific MLB endpoint
 URLS = {
+    "MLB": "https://madduxsports.com/baseballodds.php",
     "NBA": "https://madduxsports.com/nba-odds.html",
-    "NHL": "https://madduxsports.com/nhl-odds.html",
-    "MLB": "https://madduxsports.com/mlb-odds.html"
+    "NHL": "https://madduxsports.com/nhl-odds.html"
 }
 
-# Use a standard User-Agent so the site doesn't block the request
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
 }
@@ -26,27 +25,29 @@ def fetch_odds_data(sport, url):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         
-        # =========================================================
-        # TODO: UPDATE HTML PARSING LOGIC HERE
-        # You must inspect Madduxsports to find the correct table classes.
-        # Example: table = soup.find('table', {'class': 'odds-table'})
-        # =========================================================
-        
         scraped_games = []
         
-        # Simulated extraction logic (Replace with actual table row iteration)
-        # for row in table.find_all('tr')[1:]:
-        #     cols = row.find_all('td')
-        #     if len(cols) > 3:
-        #         scraped_games.append({
-        #             "matchup": cols[0].text.strip(),
-        #             "spread": cols[1].text.strip(),
-        #             "total": cols[2].text.strip(),
-        #             "moneyline": cols[3].text.strip()
-        #         })
+        # =========================================================
+        # HTML PARSING LOGIC
+        # You will need to inspect the tables on baseballodds.php 
+        # to map the exact row (tr) and column (td) elements.
+        # =========================================================
         
-        # Placeholder data to show structure if parsing isn't configured yet
-        scraped_games = [{"status": "Parsing logic needs HTML tags from site"}] 
+        # Example extraction framework:
+        # table = soup.find('table') 
+        # if table:
+        #     for row in table.find_all('tr')[1:]: # Skip header row
+        #         cols = row.find_all('td')
+        #         if len(cols) >= 4:
+        #             scraped_games.append({
+        #                 "matchup": cols[0].text.strip(),
+        #                 "spread": cols[1].text.strip(),
+        #                 "total": cols[2].text.strip(),
+        #                 "moneyline": cols[3].text.strip()
+        #             })
+        
+        # Placeholder so the JSON file generates structure before HTML parsing is mapped
+        scraped_games = [{"matchup": "Pending HTML mapping", "spread": "N/A", "total": "N/A"}] 
         
         return scraped_games
 
@@ -55,11 +56,10 @@ def fetch_odds_data(sport, url):
         return []
 
 def main():
-    # Set current time in EDT
+    # Set current time to EDT
     tz = pytz.timezone('US/Eastern')
     current_time = datetime.now(tz).strftime("%Y-%m-%d %I:%M %p %Z")
     
-    # Initialize data dictionary
     interval_data = {
         "timestamp": current_time,
         "data": {}
@@ -67,10 +67,10 @@ def main():
     
     # Scrape data for each sport
     for sport, url in URLS.items():
-        print(f"Scraping {sport}...")
+        print(f"Scraping {sport} from {url}...")
         interval_data["data"][sport] = fetch_odds_data(sport, url)
 
-    # Load existing data from JSON file
+    # Load existing historical data
     historical_data = []
     if os.path.exists(FILE_NAME):
         try:
@@ -79,10 +79,10 @@ def main():
         except json.JSONDecodeError:
             historical_data = []
 
-    # Append new interval data
+    # Append the new interval
     historical_data.append(interval_data)
 
-    # Save updated data back to JSON file
+    # Save everything back to the JSON file
     with open(FILE_NAME, "w") as f:
         json.dump(historical_data, f, indent=4)
         
