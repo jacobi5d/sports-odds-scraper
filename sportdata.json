@@ -14,5 +14,19 @@
             "NHL": [],
             "MLB": []
         }
+    },
+    {
+        "timestamp": "2026-05-05 10:21 PM EDT",
+        "data": {
+            "MLB": [
+                {
+                    "matchup": "Pending HTML mapping",
+                    "spread": "N/A",
+                    "total": "N/A"
+                }
+            ],
+            "NBA": [],
+            "NHL": []
+        }
     }
 ]
